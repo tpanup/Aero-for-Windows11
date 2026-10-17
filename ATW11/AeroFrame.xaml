@@ -1,0 +1,182 @@
+﻿<UserControl x:Class="ATW11.AeroFrame"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Focusable="False"
+             ClipToBounds="False"
+             SnapsToDevicePixels="True"
+             UseLayoutRounding="True"
+             Background="Transparent">
+
+    <UserControl.Resources>
+        <SolidColorBrush x:Key="GlyphBrush" Color="#FAFFFFFF" />
+
+
+        <!-- 顶部高光（Win7 那道"反光"）：只铺在标题栏内，薄薄一层 -->
+        <LinearGradientBrush x:Key="GlassGlossBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#66FFFFFF" Offset="0" />
+            <GradientStop Color="#26FFFFFF" Offset="0.12" />
+            <GradientStop Color="#00FFFFFF" Offset="0.46" />
+        </LinearGradientBrush>
+
+
+        <!-- 按钮上的白色字形统一加一点暗影，浅色玻璃上也看得清 -->
+        <DropShadowEffect x:Key="GlyphShadow" Color="#73000000" BlurRadius="2"
+                          ShadowDepth="1" Direction="270" Opacity="0.9" />
+
+        <!-- 外沿：上亮下暗，玻璃边缘的立体感 -->
+        <LinearGradientBrush x:Key="OuterEdgeBrush" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#8CFFFFFF" Offset="0" />
+            <GradientStop Color="#40FFFFFF" Offset="0.3" />
+            <GradientStop Color="#33101820" Offset="0.72" />
+            <GradientStop Color="#66101820" Offset="1" />
+        </LinearGradientBrush>
+
+        <!-- 标题栏按钮（最小化 / 最大化）：静止 → 玻璃；悬停 → 蓝白渐变光效 -->
+        <Style x:Key="CaptionButtonStyle" TargetType="Border">
+            <Setter Property="Height" Value="22" />
+            <Setter Property="CornerRadius" Value="3" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="#8CFFFFFF" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#E6FFFFFF" Offset="0" />
+                        <GradientStop Color="#7AD3E7F9" Offset="0.52" />
+                        <GradientStop Color="#4DB6D0EC" Offset="1" />
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="#E6FFFFFF" />
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#FFFFFFFF" Offset="0" />
+                                <GradientStop Color="#CCDCEFFF" Offset="0.45" />
+                                <GradientStop Color="#B3EFF8FF" Offset="1" />
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect Color="#FFFFFFFF" BlurRadius="14" ShadowDepth="0" Opacity="0.7" />
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- 关闭按钮：静止偏暖 → 悬停红色渐变 + 红色光晕 -->
+        <Style x:Key="CloseButtonStyle" TargetType="Border">
+            <Setter Property="Height" Value="22" />
+            <Setter Property="CornerRadius" Value="3" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="#8CFFFFFF" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#E6FFEDE9" Offset="0" />
+                        <GradientStop Color="#8CE7CFC9" Offset="0.52" />
+                        <GradientStop Color="#66D8B9B2" Offset="1" />
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="#F2FFD9D2" />
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#F7F79A8C" Offset="0" />
+                                <GradientStop Color="#F0D3433A" Offset="0.45" />
+                                <GradientStop Color="#E8AE1912" Offset="1" />
+                            </LinearGradientBrush>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect Color="#FFE0554A" BlurRadius="16" ShadowDepth="0" Opacity="0.75" />
+                        </Setter.Value>
+                    </Setter>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="Transparent">
+
+        <!-- ① 不透明的"模糊壁纸"底图：把原生标题栏彻底盖掉，同时给出真·背景模糊 -->
+        <Path x:Name="TexturePath" Opacity="1.0" IsHitTestVisible="False" />
+
+        <!-- ② Win7 蓝玻璃染色 -->
+        <Path x:Name="TintPath" IsHitTestVisible="False" />
+
+        <!-- ②-b 标题栏加深一档，保证标题和按钮看得清 -->
+        <Path x:Name="BarTintPath" IsHitTestVisible="False" />
+
+        <!-- ③ 顶部反光 -->
+        <Path x:Name="GlossPath" Fill="{StaticResource GlassGlossBrush}" IsHitTestVisible="False" />
+
+        <!-- ④ 外沿 1px 立体边 -->
+        <Path x:Name="OuterEdge" Stroke="{StaticResource OuterEdgeBrush}" StrokeThickness="1"
+              Fill="{x:Null}" IsHitTestVisible="False" />
+
+        <!-- ⑤ 内侧 1px 白色高光 —— Win7 玻璃"晶莹剔透"的关键 -->
+        <Path x:Name="InnerEdge" Stroke="#F2FFFFFF" StrokeThickness="1.4"
+              Fill="{x:Null}" IsHitTestVisible="False" />
+
+        <!-- ⑤-b 高光内侧再压一道极淡暗线：玻璃和内容之间就有了厚度 -->
+        <Path x:Name="InnerShadow" Stroke="#4D000000" StrokeThickness="1"
+              Fill="{x:Null}" IsHitTestVisible="False" />
+
+        <!-- ⑥ 标题栏内容 -->
+        <Grid x:Name="Bar" VerticalAlignment="Top" Height="38">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <Image x:Name="AppIcon" Grid.Column="0" Width="16" Height="16"
+                   VerticalAlignment="Center" Margin="0,0,8,0"
+                   RenderOptions.BitmapScalingMode="HighQuality" />
+
+            <TextBlock x:Name="TitleText" Grid.Column="1" VerticalAlignment="Center"
+                       FontFamily="Segoe UI" FontSize="12.5" Foreground="#FAFFFFFF"
+                       TextTrimming="CharacterEllipsis" TextOptions.TextFormattingMode="Ideal">
+                <TextBlock.Effect>
+                    <DropShadowEffect Color="#73000000" BlurRadius="3" ShadowDepth="1"
+                                      Direction="315" Opacity="0.9" />
+                </TextBlock.Effect>
+            </TextBlock>
+
+            <StackPanel x:Name="Buttons" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                <Border x:Name="MinButton" Width="30" Margin="0,0,1,0"
+                        Style="{StaticResource CaptionButtonStyle}">
+                    <Rectangle Width="9" Height="1.4" Fill="{StaticResource GlyphBrush}"
+                               Effect="{StaticResource GlyphShadow}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+
+                <Border x:Name="MaxButton" Width="30" Margin="0,0,1,0"
+                        Style="{StaticResource CaptionButtonStyle}">
+                    <Path x:Name="MaxGlyph" Stroke="{StaticResource GlyphBrush}" StrokeThickness="1.1"
+                          Data="M0,0 H9 V9 H0 Z"
+                          Effect="{StaticResource GlyphShadow}"
+                          HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+
+                <Border x:Name="CloseButton" Width="46"
+                        Style="{StaticResource CloseButtonStyle}">
+                    <Path Stroke="{StaticResource GlyphBrush}" StrokeThickness="1.4"
+                          Data="M0,0 L9,9 M9,0 L0,9"
+                          Effect="{StaticResource GlyphShadow}"
+                          HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

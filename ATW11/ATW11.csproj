@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- 桌面程序（无控制台窗口） -->
+    <OutputType>WinExe</OutputType>
+
+    <!-- 目标框架：.NET 8.0 + Windows 专用 API -->
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <!-- 托盘图标用 WinForms 的 NotifyIcon -->
+    <UseWindowsForms>true</UseWindowsForms>
+
+    <!-- 本机只装了 .NET 10 运行时：允许 8.0 程序向上滚动到更高大版本运行 -->
+    <RollForward>LatestMajor</RollForward>
+
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+
+    <!-- 高 DPI（Per-Monitor V2）声明，保证截图像素与窗口 1:1 对齐 -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <RootNamespace>ATW11</RootNamespace>
+    <AssemblyName>ATW11</AssemblyName>
+    <Version>1.0.0</Version>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Product>Aero to Windows 11</Product>
+    <Description>ATW11 v1.0 · 给 Windows 11 的资源管理器套上 Win7 Aero 玻璃外壳</Description>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <!-- WinForms 分析器误报：我们的 DPI 声明在 app.manifest 里，是 WPF 需要的那种 -->
+    <NoWarn>$(NoWarn);WFAC010</NoWarn>
+  </PropertyGroup>
+
+  <!-- WinForms 会顺带引入 System.Drawing / System.Windows.Forms 的全局 using，
+       这会让 WPF 的 Point / Color / KeyEventArgs 变成二义性引用。这里去掉它们，
+       只有托盘图标那个文件自己显式 using。 -->
+  <ItemGroup>
+    <Using Remove="System.Drawing" />
+    <Using Remove="System.Windows.Forms" />
+  </ItemGroup>
+
+</Project>
